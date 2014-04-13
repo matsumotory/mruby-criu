@@ -261,6 +261,17 @@ static mrb_value mrb_criu_set_log_file(mrb_state *mrb, mrb_value self)
   return mrb_str_new_cstr(mrb, data->log_file);
 }
 
+static mrb_value mrb_criu_set_log_level(mrb_state *mrb, mrb_value self)
+{
+  mrb_criu_data *data = DATA_PTR(self);
+  int log_level;
+
+  mrb_get_args(mrb, "i", &log_level);
+  criu_set_log_level(log_level);
+  data->log_level = log_level;
+
+  return mrb_fixnum_value(data->log_level);
+}
 void mrb_mruby_criu_gem_init(mrb_state *mrb)
 {
     struct RClass *criu;
@@ -279,6 +290,7 @@ void mrb_mruby_criu_gem_init(mrb_state *mrb)
     mrb_define_method(mrb, criu, "set_leave_running", mrb_criu_set_leave_running, MRB_ARGS_REQ(1));
     mrb_define_method(mrb, criu, "set_evasive_devices", mrb_criu_set_evasive_devices, MRB_ARGS_REQ(1));
     mrb_define_method(mrb, criu, "set_log_file", mrb_criu_set_log_file, MRB_ARGS_REQ(1));
+    mrb_define_method(mrb, criu, "set_log_level", mrb_criu_set_log_level, MRB_ARGS_REQ(1));
     DONE;
 }
 
