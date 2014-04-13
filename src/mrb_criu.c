@@ -20,6 +20,7 @@
 typedef struct {
   char *socket_file;
   char *images_dir;
+  char *work_dir;
   int pid;
   bool leave_running;
   bool evasive_devices;
@@ -28,14 +29,16 @@ typedef struct {
   bool ext_unix_sk;
   bool file_locks;
   int log_level;
-  int fd;
+  int images_fd;
+  int work_fd;
   char *log_file;
 } mrb_criu_data;
 
 static void mrb_criu_data_free(mrb_state *mrb, void *p)                           
 {
   mrb_criu_data *data = (mrb_criu_data *)p;
-  close(data->fd);
+  close(data->images_fd);
+  close(data->work_fd);
   mrb_free(mrb, data);
 }
 
@@ -78,6 +81,7 @@ static mrb_value mrb_criu_init(mrb_state *mrb, mrb_value self)
   data = (mrb_criu_data *)mrb_malloc(mrb, sizeof(mrb_criu_data));
   data->socket_file = NULL;
   data->images_dir = NULL;
+  data->work_dir = NULL;
   data->log_level = -1;
   data->log_file = NULL;
   DATA_PTR(self) = data;
@@ -144,9 +148,28 @@ static mrb_value mrb_criu_set_images_dir(mrb_state *mrb, mrb_value self)
 
   criu_set_images_dir_fd(fd);
   data->images_dir = images_dir;
-  data->fd = fd;
+  data->images_fd = fd;
 
-  return mrb_fixnum_value(data->fd);
+  return mrb_fixnum_value(data->images_fd);
+}
+
+static mrb_value mrb_criu_set_work_dir(mrb_state *mrb, mrb_value self)
+{
+  mrb_criu_data *data = DATA_PTR(self);
+  char *work_dir;
+  int fd;
+
+  mrb_get_args(mrb, "z", &work_dir);
+  fd = open(work_dir, O_DIRECTORY);
+  if (fd == -1) {
+    mrb_raise(mrb, E_ARGUMENT_ERROR, "not found work directory.");
+  }
+
+  criu_set_work_dir_fd(fd);
+  data->work_dir = work_dir;
+  data->work_fd = fd;
+
+  return mrb_fixnum_value(data->work_fd);
 }
 
 static mrb_value mrb_criu_set_pid(mrb_state *mrb, mrb_value self)
@@ -248,6 +271,7 @@ void mrb_mruby_criu_gem_init(mrb_state *mrb)
     mrb_define_method(mrb, criu, "check", mrb_criu_check, MRB_ARGS_NONE());
     mrb_define_method(mrb, criu, "set_service_address", mrb_criu_set_service_address, MRB_ARGS_REQ(1));
     mrb_define_method(mrb, criu, "set_images_dir", mrb_criu_set_images_dir, MRB_ARGS_REQ(1));
+    mrb_define_method(mrb, criu, "set_work_dir", mrb_criu_set_work_dir, MRB_ARGS_REQ(1));
     mrb_define_method(mrb, criu, "set_pid", mrb_criu_set_pid, MRB_ARGS_REQ(1));
     mrb_define_method(mrb, criu, "set_shell_job", mrb_criu_set_shell_job, MRB_ARGS_REQ(1));
     mrb_define_method(mrb, criu, "set_tcp_established", mrb_criu_set_tcp_established, MRB_ARGS_REQ(1));
