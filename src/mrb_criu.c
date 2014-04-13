@@ -197,6 +197,18 @@ static mrb_value mrb_criu_set_ext_unix_sk(mrb_state *mrb, mrb_value self)
   return mrb_bool_value(data->ext_unix_sk);
 }
 
+static mrb_value mrb_criu_set_leave_running(mrb_state *mrb, mrb_value self)
+{
+  mrb_criu_data *data = DATA_PTR(self);
+  mrb_bool leave_running;
+
+  mrb_get_args(mrb, "b", &leave_running);
+  criu_set_leave_running(leave_running);
+  data->leave_running = leave_running;
+
+  return mrb_bool_value(data->leave_running);
+}
+
 static mrb_value mrb_criu_set_log_file(mrb_state *mrb, mrb_value self)
 {
   mrb_criu_data *data = DATA_PTR(self);
@@ -228,6 +240,7 @@ void mrb_mruby_criu_gem_init(mrb_state *mrb)
     mrb_define_method(mrb, criu, "set_shell_job", mrb_criu_set_shell_job, MRB_ARGS_REQ(1));
     mrb_define_method(mrb, criu, "set_tcp_established", mrb_criu_set_tcp_established, MRB_ARGS_REQ(1));
     mrb_define_method(mrb, criu, "set_ext_unix_sk", mrb_criu_set_ext_unix_sk, MRB_ARGS_REQ(1));
+    mrb_define_method(mrb, criu, "set_leave_running", mrb_criu_set_leave_running, MRB_ARGS_REQ(1));
     mrb_define_method(mrb, criu, "set_log_file", mrb_criu_set_log_file, MRB_ARGS_REQ(1));
     DONE;
 }
