@@ -1,6 +1,0 @@
-name: mruby-criu
-description: CRIU, Checkpoint Restart In Userspace for Linux, class
-author: MATSUMOTO Ryosuke
-website: https://github.com/matsumoto-r/mruby-criu
-protocol: git
-repository: https://github.com/matsumoto-r/mruby-criu.git
