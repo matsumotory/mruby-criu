@@ -1,4 +1,4 @@
-# mruby-criu   [![Build Status](https://travis-ci.org/matsumoto-r/mruby-criu.png?branch=master)](https://travis-ci.org/matsumoto-r/mruby-criu)
+# mruby-criu
 CRIU, Checkpoint Restart In Userspace for Linux, bindig for mruby.
 ## install by mrbgems 
 - add conf.gem line to `build_config.rb` 
