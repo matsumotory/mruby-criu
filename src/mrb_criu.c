@@ -25,6 +25,7 @@ typedef struct {
   bool evasive_devices;
   bool shell_job;
   bool tcp_established;
+  bool ext_unix_sk;
   bool file_locks;
   int log_level;
   int fd;
@@ -184,6 +185,18 @@ static mrb_value mrb_criu_set_tcp_established(mrb_state *mrb, mrb_value self)
   return mrb_bool_value(data->tcp_established);
 }
 
+static mrb_value mrb_criu_set_ext_unix_sk(mrb_state *mrb, mrb_value self)
+{
+  mrb_criu_data *data = DATA_PTR(self);
+  mrb_bool ext_unix_sk;
+
+  mrb_get_args(mrb, "b", &ext_unix_sk);
+  criu_set_ext_unix_sk(ext_unix_sk);
+  data->ext_unix_sk = ext_unix_sk;
+
+  return mrb_bool_value(data->ext_unix_sk);
+}
+
 static mrb_value mrb_criu_set_log_file(mrb_state *mrb, mrb_value self)
 {
   mrb_criu_data *data = DATA_PTR(self);
@@ -214,6 +227,7 @@ void mrb_mruby_criu_gem_init(mrb_state *mrb)
     mrb_define_method(mrb, criu, "set_pid", mrb_criu_set_pid, MRB_ARGS_REQ(1));
     mrb_define_method(mrb, criu, "set_shell_job", mrb_criu_set_shell_job, MRB_ARGS_REQ(1));
     mrb_define_method(mrb, criu, "set_tcp_established", mrb_criu_set_tcp_established, MRB_ARGS_REQ(1));
+    mrb_define_method(mrb, criu, "set_ext_unix_sk", mrb_criu_set_ext_unix_sk, MRB_ARGS_REQ(1));
     mrb_define_method(mrb, criu, "set_log_file", mrb_criu_set_log_file, MRB_ARGS_REQ(1));
     DONE;
 }
