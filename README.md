@@ -1,5 +1,5 @@
 # mruby-criu
-[CRIU, Checkpoint Restart In Userspace for Linux](http://criu.org/Main_Page), bindig for mruby.
+[CRIU, Checkpoint Restart In Userspace for Linux](http://criu.org/Main_Page), binding for mruby.
 ## install by mrbgems 
 - add conf.gem line to `build_config.rb` 
 
