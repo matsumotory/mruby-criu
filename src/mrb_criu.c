@@ -88,6 +88,7 @@ static mrb_value mrb_criu_init(mrb_state *mrb, mrb_value self)
   DATA_PTR(self) = data;
 
   criu_init_opts();
+  criu_set_service_comm(CRIU_COMM_SK);
 
   return self;
 }
