@@ -13,6 +13,7 @@
 
 #include "mruby.h"
 #include "mruby/data.h"
+#include "mruby/class.h"
 #include "mrb_criu.h"
 
 #define DONE mrb_gc_arena_restore(mrb, 0);
@@ -21,16 +22,16 @@ typedef struct {
   char *socket_file;
   char *images_dir;
   char *work_dir;
-  int pid;
+  mrb_int pid;
   bool leave_running;
   bool evasive_devices;
   bool shell_job;
   bool tcp_established;
   bool ext_unix_sk;
   bool file_locks;
-  int log_level;
-  int images_fd;
-  int work_fd;
+  mrb_int log_level;
+  mrb_int images_fd;
+  mrb_int work_fd;
   char *log_file;
 } mrb_criu_data;
 
@@ -157,7 +158,7 @@ static mrb_value mrb_criu_set_work_dir(mrb_state *mrb, mrb_value self)
 {
   mrb_criu_data *data = DATA_PTR(self);
   char *work_dir;
-  int fd;
+  mrb_int fd;
 
   mrb_get_args(mrb, "z", &work_dir);
   fd = open(work_dir, O_DIRECTORY);
@@ -175,13 +176,13 @@ static mrb_value mrb_criu_set_work_dir(mrb_state *mrb, mrb_value self)
 static mrb_value mrb_criu_set_pid(mrb_state *mrb, mrb_value self)
 {
   mrb_criu_data *data = DATA_PTR(self);
-  int pid;
+  mrb_int pid;
 
   mrb_get_args(mrb, "i", &pid);
   criu_set_pid(pid);
   data->pid = pid;
 
-  return mrb_fixnum_value(data->pid);
+  return mrb_fixnum_value(pid);
 }
 
 static mrb_value mrb_criu_set_shell_job(mrb_state *mrb, mrb_value self)
@@ -264,7 +265,7 @@ static mrb_value mrb_criu_set_log_file(mrb_state *mrb, mrb_value self)
 static mrb_value mrb_criu_set_log_level(mrb_state *mrb, mrb_value self)
 {
   mrb_criu_data *data = DATA_PTR(self);
-  int log_level;
+  mrb_int log_level;
 
   mrb_get_args(mrb, "i", &log_level);
   criu_set_log_level(log_level);
@@ -276,6 +277,8 @@ void mrb_mruby_criu_gem_init(mrb_state *mrb)
 {
     struct RClass *criu;
     criu = mrb_define_class(mrb, "CRIU", mrb->object_class);
+    MRB_SET_INSTANCE_TT(criu, MRB_TT_DATA);
+
     mrb_define_method(mrb, criu, "initialize", mrb_criu_init, MRB_ARGS_NONE());
     mrb_define_method(mrb, criu, "dump", mrb_criu_dump, MRB_ARGS_NONE());
     mrb_define_method(mrb, criu, "restore", mrb_criu_restore, MRB_ARGS_NONE());
