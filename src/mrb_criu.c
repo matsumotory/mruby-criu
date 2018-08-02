@@ -35,7 +35,7 @@ typedef struct {
   char *log_file;
 } mrb_criu_data;
 
-static void mrb_criu_data_free(mrb_state *mrb, void *p)                           
+static void mrb_criu_data_free(mrb_state *mrb, void *p)
 {
   mrb_criu_data *data = (mrb_criu_data *)p;
   close(data->images_fd);
@@ -60,7 +60,7 @@ static void mrb_criu_error(mrb_state *mrb, int ret)
     mrb_raise(mrb, E_RUNTIME_ERROR, "CRIU doesn't support this type of request."
         "You should probably update CRIU");
   case -EBADMSG:
-    mrb_raise(mrb, E_RUNTIME_ERROR, "Unexpected response from CRIU." 
+    mrb_raise(mrb, E_RUNTIME_ERROR, "Unexpected response from CRIU."
         "You should probably update CRIU");
   default:
     mrb_raise(mrb, E_RUNTIME_ERROR, "Unknown error type code."
@@ -106,7 +106,18 @@ static mrb_value mrb_criu_dump(mrb_state *mrb, mrb_value self)
 static mrb_value mrb_criu_restore(mrb_state *mrb, mrb_value self)
 {
   int ret;
+
   ret = criu_restore();
+  if (ret < 0) {
+    mrb_criu_error(mrb, ret);
+  }
+  return mrb_fixnum_value(ret);
+}
+
+static mrb_value mrb_criu_restore_child(mrb_state *mrb, mrb_value self)
+{
+  int ret;
+  ret = criu_restore_child();
   if (ret < 0) {
     mrb_criu_error(mrb, ret);
   }
@@ -274,6 +285,20 @@ static mrb_value mrb_criu_set_log_level(mrb_state *mrb, mrb_value self)
 
   return mrb_fixnum_value(data->log_level);
 }
+
+static mrb_value mrb_criu_set_service_binary(mrb_state *mrb, mrb_value self)
+{
+  char *bin;
+
+  mrb_get_args(mrb, "z", &bin);
+  criu_set_service_binary(bin);
+
+  /* Force to be comm_bin mode */
+  criu_set_service_comm(CRIU_COMM_BIN);
+
+  return mrb_str_new_cstr(mrb, bin);
+}
+
 void mrb_mruby_criu_gem_init(mrb_state *mrb)
 {
     struct RClass *criu;
@@ -283,6 +308,7 @@ void mrb_mruby_criu_gem_init(mrb_state *mrb)
     mrb_define_method(mrb, criu, "initialize", mrb_criu_init, MRB_ARGS_NONE());
     mrb_define_method(mrb, criu, "dump", mrb_criu_dump, MRB_ARGS_NONE());
     mrb_define_method(mrb, criu, "restore", mrb_criu_restore, MRB_ARGS_NONE());
+    mrb_define_method(mrb, criu, "restore_child", mrb_criu_restore_child, MRB_ARGS_NONE());
     mrb_define_method(mrb, criu, "check", mrb_criu_check, MRB_ARGS_NONE());
     mrb_define_method(mrb, criu, "set_service_address", mrb_criu_set_service_address, MRB_ARGS_REQ(1));
     mrb_define_method(mrb, criu, "set_images_dir", mrb_criu_set_images_dir, MRB_ARGS_REQ(1));
@@ -295,10 +321,10 @@ void mrb_mruby_criu_gem_init(mrb_state *mrb)
     mrb_define_method(mrb, criu, "set_evasive_devices", mrb_criu_set_evasive_devices, MRB_ARGS_REQ(1));
     mrb_define_method(mrb, criu, "set_log_file", mrb_criu_set_log_file, MRB_ARGS_REQ(1));
     mrb_define_method(mrb, criu, "set_log_level", mrb_criu_set_log_level, MRB_ARGS_REQ(1));
+    mrb_define_method(mrb, criu, "set_service_binary", mrb_criu_set_service_binary, MRB_ARGS_REQ(1));
     DONE;
 }
 
 void mrb_mruby_criu_gem_final(mrb_state *mrb)
 {
 }
-
