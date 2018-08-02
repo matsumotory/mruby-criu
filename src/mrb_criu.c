@@ -35,7 +35,7 @@ typedef struct {
   char *log_file;
 } mrb_criu_data;
 
-static void mrb_criu_data_free(mrb_state *mrb, void *p)                           
+static void mrb_criu_data_free(mrb_state *mrb, void *p)
 {
   mrb_criu_data *data = (mrb_criu_data *)p;
   close(data->images_fd);
@@ -60,7 +60,7 @@ static void mrb_criu_error(mrb_state *mrb, int ret)
     mrb_raise(mrb, E_RUNTIME_ERROR, "CRIU doesn't support this type of request."
         "You should probably update CRIU");
   case -EBADMSG:
-    mrb_raise(mrb, E_RUNTIME_ERROR, "Unexpected response from CRIU." 
+    mrb_raise(mrb, E_RUNTIME_ERROR, "Unexpected response from CRIU."
         "You should probably update CRIU");
   default:
     mrb_raise(mrb, E_RUNTIME_ERROR, "Unknown error type code."
