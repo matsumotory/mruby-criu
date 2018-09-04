@@ -299,6 +299,16 @@ static mrb_value mrb_criu_set_service_binary(mrb_state *mrb, mrb_value self)
   return mrb_str_new_cstr(mrb, bin);
 }
 
+static mrb_value mrb_criu_add_external(mrb_state *mrb, mrb_value self)
+{
+  char *external;
+
+  mrb_get_args(mrb, "z", &external);
+  criu_add_external(external);
+
+  return mrb_str_new_cstr(mrb, external);
+}
+
 void mrb_mruby_criu_gem_init(mrb_state *mrb)
 {
     struct RClass *criu;
@@ -322,6 +332,7 @@ void mrb_mruby_criu_gem_init(mrb_state *mrb)
     mrb_define_method(mrb, criu, "set_log_file", mrb_criu_set_log_file, MRB_ARGS_REQ(1));
     mrb_define_method(mrb, criu, "set_log_level", mrb_criu_set_log_level, MRB_ARGS_REQ(1));
     mrb_define_method(mrb, criu, "set_service_binary", mrb_criu_set_service_binary, MRB_ARGS_REQ(1));
+    mrb_define_method(mrb, criu, "add_external", mrb_criu_add_external, MRB_ARGS_REQ(1));
     DONE;
 }
 
