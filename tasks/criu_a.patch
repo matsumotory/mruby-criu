@@ -1,0 +1,20 @@
+diff --git a/lib/Makefile b/lib/Makefile
+index 9463284..1facc25 100644
+--- a/lib/Makefile
++++ b/lib/Makefile
+@@ -1,4 +1,5 @@
+ CRIU_SO			:= libcriu.so
++CRIU_A			:= libcriu.a
+ UAPI_HEADERS		:= lib/c/criu.h images/rpc.proto
+ 
+ #
+@@ -19,6 +20,9 @@ ldflags-so		+= -lprotobuf-c
+ lib/c/$(CRIU_SO): lib/c/built-in.o
+ 	$(call msg-link, $@)
+ 	$(Q) $(CC) -shared $(cflags-so) -o $@ $^ $(ldflags-so) $(LDFLAGS)
++lib/c/$(CRIU_A): lib/c/built-in.o
++	$(call msg-link, $@)
++	ar rcs $@ $^
+ lib-c: lib/c/$(CRIU_SO)
+ .PHONY: lib-c
+ 
