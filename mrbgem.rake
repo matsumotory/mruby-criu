@@ -9,8 +9,11 @@ require_relative 'tasks/staticify'
 MRuby::Gem::Specification.new('mruby-criu') do |spec|
   spec.license = 'MIT'
   spec.authors = 'MATSUMOTO Ryosuke'
-  # spec.linker.libraries << 'criu'
 
-  spec.extend CRIU::Staticify
-  spec.bundle_libcriu
+  if spec.build.cc.defines.flatten.include?("MRB_CRIU_USE_STATIC")
+    spec.extend CRIU::Staticify
+    spec.bundle_libcriu
+  else
+    spec.linker.libraries << 'criu'
+  end
 end
