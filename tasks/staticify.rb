@@ -17,7 +17,7 @@ module CRIU::Staticify
     version = CRIU::CRIU_VERSION
     tarball_url = "https://github.com/checkpoint-restore/criu/archive/v#{version}.tar.gz"
 
-    def criu_dir(b); "#{b.build_dir}/vendor/libcriu"; end
+    def criu_dir(b); (ENV["CRIU_TMP_DIR"] || "#{b.build_dir}/vendor/libcriu"); end
     def libcriu_dir(b); "#{criu_dir(b)}/lib/c"; end
     def libcriu_header(b); "#{criu_dir(b)}/lib/c/criu.h"; end
     def libcriu_a(b); libfile "#{criu_dir(b)}/lib/c/libcriu"; end
@@ -30,7 +30,7 @@ module CRIU::Staticify
       unless File.exist? libcriu_dir(build)
         tmpdir = '/tmp'
         run_command ENV, "rm -rf #{tmpdir}/libcriu-#{version}"
-        run_command ENV, "mkdir -p #{File.dirname(criu_dir(build))}"
+        run_command ENV, "mkdir -p #{File.dirname(criu_dir(build))} #{File.dirname(criu_dir(build))}"
         run_command ENV, "curl -sL #{tarball_url} | tar -xz -f - -C #{tmpdir}"
         run_command ENV, "mv -f #{tmpdir}/criu-#{version} #{criu_dir(build)}"
         run_command ENV, "cd #{criu_dir(build)} && patch -p1 < #{PATCH_PATH}"
@@ -41,7 +41,7 @@ module CRIU::Staticify
       unless File.exist?(libcriu_a(build))
         Dir.chdir criu_dir(build) do
           ENV["LD_FLAGS"] = "-lprotobuf-c"
-           run_command ENV, "make lib/c/libcriu.a"
+          run_command ENV, "make lib/c/libcriu.a"
         end
       end
     end
