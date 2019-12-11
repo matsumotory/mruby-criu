@@ -45,6 +45,7 @@ module CRIU::Staticify
         Dir.chdir criu_dir(build) do
           ENV["LD_FLAGS"] = "-lprotobuf-c"
           run_command ENV, "make lib/c/libcriu.a"
+          run_command ENV, "cp criu/include/version.h #{File.dirname(libcriu_a(build))}"
         end
       end
     end
