@@ -6,6 +6,8 @@
 ** See Copyright Notice in LICENSE
 */
 
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>
@@ -88,7 +90,6 @@ static mrb_value mrb_criu_init(mrb_state *mrb, mrb_value self)
   DATA_PTR(self) = data;
 
   criu_init_opts();
-  criu_set_service_comm(CRIU_COMM_SK);
 
   return self;
 }
@@ -292,9 +293,6 @@ static mrb_value mrb_criu_set_service_binary(mrb_state *mrb, mrb_value self)
 
   mrb_get_args(mrb, "z", &bin);
   criu_set_service_binary(bin);
-
-  /* Force to be comm_bin mode */
-  criu_set_service_comm(CRIU_COMM_BIN);
 
   return mrb_str_new_cstr(mrb, bin);
 }
