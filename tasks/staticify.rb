@@ -33,7 +33,9 @@ module CRIU::Staticify
         run_command ENV, "mkdir -p #{File.dirname(criu_dir(build))} #{File.dirname(criu_dir(build))}"
         run_command ENV, "curl -sL #{tarball_url} | tar -xz -f - -C #{tmpdir}"
         run_command ENV, "mv -f #{tmpdir}/criu-#{version} #{criu_dir(build)}"
-        run_command ENV, "cd #{criu_dir(build)} && patch -p1 < #{PATCH_PATH}"
+        if CRIU::CRIU_VERSION != '3.13'
+          run_command ENV, "cd #{criu_dir(build)} && patch -p1 < #{PATCH_PATH}"
+        end
         run_command ENV, "cd #{File.dirname(libcriu_a(build))} && ln -s . criu" # resolve include <criu/criu.h>
       end
     end
@@ -43,6 +45,7 @@ module CRIU::Staticify
         Dir.chdir criu_dir(build) do
           ENV["LD_FLAGS"] = "-lprotobuf-c"
           run_command ENV, "make lib/c/libcriu.a"
+          run_command ENV, "cp criu/include/version.h #{File.dirname(libcriu_a(build))}"
         end
       end
     end

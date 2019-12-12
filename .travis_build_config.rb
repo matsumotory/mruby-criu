@@ -6,4 +6,5 @@ MRuby::Build.new do |conf|
 
   conf.gembox 'default'
   conf.gem '../mruby-criu'
+  conf.cc.defines << "MRB_CRIU_USE_STATIC"
 end
